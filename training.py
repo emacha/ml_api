@@ -4,10 +4,14 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from api import PredictRequest
+#from api import PredictRequest
 import numpy as np
 
 SEED = 1234
+
+
+class IncorrectColumnsError(Exception):
+    pass
 
 
 @dataclass(init=True)
@@ -17,11 +21,14 @@ class EnsembleModel:
     forest: RandomForestClassifier
     columns: List[str]
 
-    def predict(self, request: PredictRequest) -> float:
+    def predict(self, request: "PredictRequest") -> float:
         """Return ensemble prediction positive class probability.
         The prediction is a simple mean of constituent models.
          """
-        row = [[request.features[k] for k in self.columns]]
+        try:
+            row = [[request.features[k] for k in self.columns]]
+        except KeyError:
+            raise IncorrectColumnsError()
 
         linpred = self.linear.predict_proba(row)[0, 1]
         gbmpred = self.gbm.predict_proba(row)[0, 1]
@@ -48,12 +55,3 @@ def train_model() -> EnsembleModel:
 
     model = EnsembleModel(linear=clf_linear, gbm=clf_gbm, forest=clf_forest, columns=predictors)
     return model
-
-
-if __name__ == "__main__":
-    model = train_model()
-    test_row = {'age': 65.0, 'anaemia': 1.0, 'creatinine_phosphokinase': 52.0, 'diabetes': 0.0, 'ejection_fraction': 25.0, 'high_blood_pressure': 1.0, 'platelets': 276000.0, 'serum_creatinine': 1.3, 'serum_sodium': 137.0, 'sex': 0.0, 'smoking': 0.0, 'time': 16.0, 'DEATH_EVENT': 0.0}
-    print(model.predict(PredictRequest(features=test_row)))
-
-
-

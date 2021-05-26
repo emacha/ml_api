@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional, List, Dict
+import training
 
 
 class PredictRequest(BaseModel):
@@ -28,5 +29,11 @@ async def explain_api() -> ModelResponse:
 
 @app.post("/predict")
 async def get_model_predictions(request: PredictRequest) -> ModelResponse:
-    #TODO  YOUR CODE HERE
+    model = training.train_model()
 
+    try:
+        prediction = model.predict(request)
+    except training.IncorrectColumnsError:
+        return ModelResponse(error="Incorrect columns provided!")    
+
+    return ModelResponse(predictions=[{"probability": prediction}])
