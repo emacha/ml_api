@@ -27,10 +27,10 @@ def test_wrong_method():
 
 def test_correct_prediction():
     features_ = {'age': 65.0, 'anaemia': 1.0, 'creatinine_phosphokinase': 52.0, 'diabetes': 0.0, 'ejection_fraction': 25.0, 'high_blood_pressure': 1.0, 'platelets': 276000.0, 'serum_creatinine': 1.3, 'serum_sodium': 137.0, 'sex': 0.0, 'smoking': 0.0, 'time': 16.0, 'DEATH_EVENT': 0.0}
-    data_ = PredictRequest(features=features_)
-    response = client.post("/predict", data=data_)
+    response = client.post("/predict", json={"features": features_})
+
     assert response.status_code == 200
-    assert response.json() == {"predictions": [{"probability": 0.40215089157255884}]}
+    assert response.json() == {"predictions": [{"probability": 0.40215089157255884}], "error": None}
 
 
 def test_incorrect_data():
