@@ -2,8 +2,17 @@ from fastapi.testclient import TestClient
 
 from api import app, PredictRequest
 import training
+import pytest
+import json
+from pathlib import Path
+
 
 client = TestClient(app)
+
+
+@pytest.fixture(scope="function")
+def sample_data():
+    return json.loads(Path("sample_data.json").read_text())
 
 
 def test_read_root():
@@ -24,39 +33,35 @@ def test_wrong_method():
     assert response.json() == {"error": "Send a POST request to this endpoint with 'features' data.", "predictions": None}
 
 
-def test_correct_prediction():
-    features_ = {'age': 65.0, 'anaemia': 1.0, 'creatinine_phosphokinase': 52.0, 'diabetes': 0.0, 'ejection_fraction': 25.0, 'high_blood_pressure': 1.0, 'platelets': 276000.0, 'serum_creatinine': 1.3, 'serum_sodium': 137.0, 'sex': 0.0, 'smoking': 0.0, 'time': 16.0, 'DEATH_EVENT': 0.0}
-    response = client.post("/predict", json={"features": features_})
+def test_correct_prediction(sample_data):
+    response = client.post("/predict", json={"features": sample_data})
 
     assert response.status_code == 200
     assert response.json() == {"predictions": [{"probability": 0.40215089157255884}], "error": None}
 
 
-def test_missing_column():
-    features_ = {'age': 65.0, 'anaemia': 1.0, 'creatinine_phosphokinase': 52.0, 'diabetes': 0.0, 'ejection_fraction': 25.0, 'high_blood_pressure': 1.0, 'platelets': 276000.0, 'serum_creatinine': 1.3, 'serum_sodium': 137.0, 'sex': 0.0, 'smoking': 0.0, 'time': 16.0, 'DEATH_EVENT': 0.0}
-    features_.pop("age")
-    response = client.post("/predict", json={"features": features_})
+def test_missing_column(sample_data):
+    sample_data.pop("age")
+    response = client.post("/predict", json={"features": sample_data})
 
     assert response.status_code == 200
     assert response.json() == {"predictions": None, "error": "Incorrect columns provided!"}
 
 
-def test_bad_data_type():
-    features_ = {'age': 65.0, 'anaemia': 1.0, 'creatinine_phosphokinase': 52.0, 'diabetes': 0.0, 'ejection_fraction': 25.0, 'high_blood_pressure': 1.0, 'platelets': 276000.0, 'serum_creatinine': 1.3, 'serum_sodium': 137.0, 'sex': 0.0, 'smoking': 0.0, 'time': 16.0, 'DEATH_EVENT': 0.0}
-    features_["age"] = "not a number"
-    response = client.post("/predict", json={"features": features_})
+def test_bad_data_type(sample_data):
+    sample_data["age"] = "not a number"
+    response = client.post("/predict", json={"features": sample_data})
 
     # FastAPI does the validation
     assert response.status_code == 422
 
 
-def test_model_saving_loading(tmp_path):
+def test_model_saving_loading(tmp_path, sample_data):
     model = training.train_model()
     path = tmp_path / "ensemble_model"
     model.save(path)
     loaded_model = training.EnsembleModel.load(path)
 
-    features_ = {'age': 65.0, 'anaemia': 1.0, 'creatinine_phosphokinase': 52.0, 'diabetes': 0.0, 'ejection_fraction': 25.0, 'high_blood_pressure': 1.0, 'platelets': 276000.0, 'serum_creatinine': 1.3, 'serum_sodium': 137.0, 'sex': 0.0, 'smoking': 0.0, 'time': 16.0, 'DEATH_EVENT': 0.0}
-    row = PredictRequest(features=features_)
+    row = PredictRequest(features=sample_data)
 
     assert model.predict(row) == loaded_model.predict(row)
