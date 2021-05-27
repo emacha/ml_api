@@ -52,7 +52,7 @@ def test_bad_data_type():
 
 def test_model_saving_loading(tmp_path):
     model = training.train_model()
-    path = tmp_path / "model.pkl"
+    path = tmp_path / "ensemble_model"
     model.save(path)
     loaded_model = training.EnsembleModel.load(path)
 

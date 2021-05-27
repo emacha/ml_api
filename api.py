@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional, List, Dict
 import training
+from pathlib import Path
 
 
 class PredictRequest(BaseModel):
@@ -29,7 +30,7 @@ async def explain_api() -> ModelResponse:
 
 @app.post("/predict")
 async def get_model_predictions(request: PredictRequest) -> ModelResponse:
-    model = training.train_model()
+    model = training.EnsembleModel.load(Path("ensemble_model"))
 
     try:
         prediction = model.predict(request)

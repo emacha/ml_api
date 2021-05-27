@@ -4,11 +4,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-#from api import PredictRequest
 import numpy as np
 import typer
 from pathlib import Path
-import pickle
+import joblib
 
 
 SEED = 1234
@@ -40,12 +39,20 @@ class EnsembleModel:
 
         return np.mean([linpred, gbmpred, forpred], axis=0)
 
-    @staticmethod
-    def load(path: Path) -> "EnsembleModel":
-        return pickle.loads(path.read_bytes())
+    @classmethod
+    def load(cls, path: Path) -> "EnsembleModel":
+        linear = joblib.load(path / "linear.joblib")
+        gbm = joblib.load(path / "gbm.joblib")
+        forest = joblib.load(path / "forest.joblib")
+        columns = joblib.load(path / "columns.joblib")
+        return cls(linear, gbm, forest, columns)
 
     def save(self, path: Path):
-        path.write_bytes(pickle.dumps(self))
+        path.mkdir(exist_ok=True)
+        joblib.dump(self.linear, path / "linear.joblib")
+        joblib.dump(self.gbm, path / "gbm.joblib")
+        joblib.dump(self.forest, path / "forest.joblib")
+        joblib.dump(self.columns, path / "columns.joblib")
 
 
 def train_model() -> EnsembleModel:
@@ -72,7 +79,7 @@ def main(save: bool = False):
     typer.echo("Training model...")
     model = train_model()
     if save:
-        model_path = Path("ensemble.model").absolute()
+        model_path = Path("ensemble_model").absolute()
         typer.echo(f"Saving model to {model_path}")
         model.save(model_path)
 
