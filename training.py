@@ -40,6 +40,13 @@ class EnsembleModel:
 
         return np.mean([linpred, gbmpred, forpred], axis=0)
 
+    @classmethod
+    def load(path: Path) -> "EnsembleModel":
+        return pickle.loads(path.read_bytes())
+
+    def save(self, path: Path):
+        path.write_bytes(pickle.dumps(self))
+
 
 def train_model() -> EnsembleModel:
     """Train Ensemble model."""
@@ -67,7 +74,7 @@ def main(save: bool = False):
     if save:
         model_path = Path("ensemble.model").absolute()
         typer.echo(f"Saving model to {model_path}")
-        model_path.write_bytes(pickle.dumps(model))
+        model.save(model_path)
 
 
 if __name__ == "__main__":
