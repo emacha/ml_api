@@ -6,6 +6,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 #from api import PredictRequest
 import numpy as np
+import typer
+from pathlib import Path
+import pickle
+
 
 SEED = 1234
 
@@ -55,3 +59,16 @@ def train_model() -> EnsembleModel:
 
     model = EnsembleModel(linear=clf_linear, gbm=clf_gbm, forest=clf_forest, columns=predictors)
     return model
+
+
+def main(save: bool = False):
+    typer.echo("Training model...")
+    model = train_model()
+    if save:
+        model_path = Path("ensemble.model").absolute()
+        typer.echo(f"Saving model to {model_path}")
+        model_path.write_bytes(pickle.dumps(model))
+
+
+if __name__ == "__main__":
+    typer.run(main)

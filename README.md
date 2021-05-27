@@ -8,5 +8,16 @@ using the [miniconda](https://docs.conda.io/en/latest/miniconda.html) distributi
 Create a new virtual environment with required packages by running:
 `conda env create -f conda_env.yml`
 
+## Commands
 
+
+Train the model by running: `python training.py`
+
+The default option does not save the model. Save it by running: `python training.py --save`
+
+
+
+
+
+#### TODO: fixtures, memoize train, save model, instructions, lint
 
