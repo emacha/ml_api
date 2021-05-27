@@ -40,7 +40,7 @@ class EnsembleModel:
 
         return np.mean([linpred, gbmpred, forpred], axis=0)
 
-    @classmethod
+    @staticmethod
     def load(path: Path) -> "EnsembleModel":
         return pickle.loads(path.read_bytes())
 
