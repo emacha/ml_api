@@ -30,7 +30,7 @@ async def explain_api() -> ModelResponse:
 
 @app.post("/predict")
 async def get_model_predictions(request: PredictRequest) -> ModelResponse:
-    model = training.EnsembleModel.load(Path("ensemble_model"))
+    model = training.get_model()
 
     try:
         prediction = model.predict(request)

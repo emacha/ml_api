@@ -8,6 +8,7 @@ import numpy as np
 import typer
 from pathlib import Path
 import joblib
+from functools import lru_cache
 
 
 SEED = 1234
@@ -73,6 +74,15 @@ def train_model() -> EnsembleModel:
 
     model = EnsembleModel(linear=clf_linear, gbm=clf_gbm, forest=clf_forest, columns=predictors)
     return model
+
+
+@lru_cache
+def get_model() -> EnsembleModel:
+    """Load trained model if saved, otherwise train it."""
+    try:
+        return EnsembleModel.load(Path("ensemble_model"))
+    except FileNotFoundError:
+        return train_model()
 
 
 def main(save: bool = False):
