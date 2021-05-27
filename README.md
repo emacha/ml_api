@@ -8,8 +8,15 @@ using the [miniconda](https://docs.conda.io/en/latest/miniconda.html) distributi
 Create a new virtual environment with required packages by running:
 `conda env create -f conda_env.yml`
 
+Activate it with `conda activate ml_api`
+
 ## Commands
 
+### Start the server
+
+Run: `uvicorn api:app`
+
+### Training the model
 
 Train the model by running: `python training.py`
 
@@ -19,5 +26,5 @@ The default option does not save the model. Save it by running: `python training
 
 
 
-#### TODO: fixtures, memoize train, save model, instructions, lint
+#### TODO: fixtures, instructions, lint
 

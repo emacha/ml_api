@@ -42,18 +42,10 @@ class EnsembleModel:
 
     @classmethod
     def load(cls, path: Path) -> "EnsembleModel":
-        linear = joblib.load(path / "linear.joblib")
-        gbm = joblib.load(path / "gbm.joblib")
-        forest = joblib.load(path / "forest.joblib")
-        columns = joblib.load(path / "columns.joblib")
-        return cls(linear, gbm, forest, columns)
+        return cls(*joblib.load(path))
 
     def save(self, path: Path):
-        path.mkdir(exist_ok=True)
-        joblib.dump(self.linear, path / "linear.joblib")
-        joblib.dump(self.gbm, path / "gbm.joblib")
-        joblib.dump(self.forest, path / "forest.joblib")
-        joblib.dump(self.columns, path / "columns.joblib")
+        joblib.dump([self.linear, self.gbm, self.forest, self.columns], path)
 
 
 def train_model() -> EnsembleModel:
@@ -86,6 +78,7 @@ def get_model() -> EnsembleModel:
 
 
 def main(save: bool = False):
+    """Train the model. Use --save to save to disk."""
     typer.echo("Training model...")
     model = train_model()
     if save:
