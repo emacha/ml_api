@@ -18,7 +18,7 @@ class IncorrectColumnsError(Exception):
     pass
 
 
-@dataclass(init=True)
+@dataclass()
 class EnsembleModel:
     linear: LogisticRegression
     gbm: GradientBoostingClassifier
