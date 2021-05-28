@@ -1,11 +1,11 @@
-from fastapi.testclient import TestClient
-
-from api import app, PredictRequest
-import training
-import pytest
 import json
 from pathlib import Path
 
+import pytest
+from fastapi.testclient import TestClient
+
+import training
+from api import PredictRequest, app
 
 client = TestClient(app)
 
@@ -30,14 +30,20 @@ def test_incorrect_url():
 def test_wrong_method():
     response = client.get("/predict")
     assert response.status_code == 200
-    assert response.json() == {"error": "Send a POST request to this endpoint with 'features' data.", "predictions": None}
+    assert response.json() == {
+        "error": "Send a POST request to this endpoint with 'features' data.",
+        "predictions": None,
+    }
 
 
 def test_correct_prediction(sample_data):
     response = client.post("/predict", json={"features": sample_data})
 
     assert response.status_code == 200
-    assert response.json() == {"predictions": [{"probability": 0.40215089157255884}], "error": None}
+    assert response.json() == {
+        "predictions": [{"probability": 0.40215089157255884}],
+        "error": None,
+    }
 
 
 def test_missing_column(sample_data):
@@ -45,7 +51,10 @@ def test_missing_column(sample_data):
     response = client.post("/predict", json={"features": sample_data})
 
     assert response.status_code == 200
-    assert response.json() == {"predictions": None, "error": "Incorrect columns provided!"}
+    assert response.json() == {
+        "predictions": None,
+        "error": "Incorrect columns provided!",
+    }
 
 
 def test_bad_data_type(sample_data):

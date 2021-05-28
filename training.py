@@ -1,15 +1,15 @@
 from dataclasses import dataclass
-from typing import List
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-import numpy as np
-import typer
-from pathlib import Path
-import joblib
 from functools import lru_cache
+from pathlib import Path
+from typing import List
 
+import joblib
+import numpy as np
+import pandas as pd
+import typer
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 
 SEED = 1234
 
@@ -28,7 +28,7 @@ class EnsembleModel:
     def predict(self, request: "PredictRequest") -> float:
         """Return ensemble prediction positive class probability.
         The prediction is a simple mean of constituent models.
-         """
+        """
         try:
             row = [[request.features[k] for k in self.columns]]
         except KeyError:
@@ -51,7 +51,9 @@ class EnsembleModel:
 def train_model() -> EnsembleModel:
     """Train Ensemble model."""
     data = pd.read_csv("data/heart_failure_clinical_records_dataset.csv")
-    train, test = train_test_split(data, test_size=.2, random_state=SEED, stratify=data.DEATH_EVENT)
+    train, test = train_test_split(
+        data, test_size=0.2, random_state=SEED, stratify=data.DEATH_EVENT
+    )
 
     target = "DEATH_EVENT"
     predictors = data.columns.difference([target])
@@ -64,7 +66,9 @@ def train_model() -> EnsembleModel:
     clf_gbm.fit(train[predictors], train[target])
     clf_forest.fit(train[predictors], train[target])
 
-    model = EnsembleModel(linear=clf_linear, gbm=clf_gbm, forest=clf_forest, columns=predictors)
+    model = EnsembleModel(
+        linear=clf_linear, gbm=clf_gbm, forest=clf_forest, columns=predictors
+    )
     return model
 
 
