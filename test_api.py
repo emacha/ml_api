@@ -12,7 +12,7 @@ client = TestClient(app)
 
 @pytest.fixture(scope="function")
 def sample_data():
-    return json.loads(Path("sample_data.json").read_text())
+    return json.loads(Path("sample_data.json").read_text())["features"]
 
 
 def test_read_root():
